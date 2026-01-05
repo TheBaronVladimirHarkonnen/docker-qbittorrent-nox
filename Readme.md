@@ -56,7 +56,8 @@ https://github.com/qbittorrent/qBittorrent/issues
       This environment variable specifies the version of qBittorrent-nox to use. \
       For example, `4.4.5-1` is a valid entry. You can find all tagged versions [here](https://hub.docker.com/r/qbittorrentofficial/qbittorrent-nox/tags). \
       You can put `latest` to use the latest stable release of qBittorrent. \
-      If you are looking to test the bleeding-edge version, you can put `alpha` to get the weekly build.
+      If you are looking to test the bleeding-edge version, you can put `alpha` to get the weekly build. \
+      A `lt2` variation is available which uses libtorrent v2.x. However, users have reported memory/performance [issues](https://github.com/arvidn/libtorrent/issues/6667). Use at your own risk!
     * `QBT_TORRENTING_PORT` \
       This environment variable defines the port number used for torrenting traffic.
       Defaults to port `6881` if value is not set.
