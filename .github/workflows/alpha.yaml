@@ -45,6 +45,9 @@ jobs:
         with:
           build-args: |
             QBT_VERSION=devel
+            BOOST_VERSION_MAJOR=1
+            BOOST_VERSION_MINOR=90
+            BOOST_VERSION_PATCH=0
             LIBBT_VERSION=RC_2_0
             LIBBT_CMAKE_FLAGS=-Ddeprecated-functions=ON
           labels: |
