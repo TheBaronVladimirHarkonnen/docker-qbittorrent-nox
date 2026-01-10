@@ -15,7 +15,7 @@ env:
 jobs:
   build:
     name: Release - Build
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.targets.runs-on }}
     permissions:
       attestations: write
       id-token: write
@@ -23,13 +23,19 @@ jobs:
 
     strategy:
       matrix:
-        platform:
-          - "linux/386"
-          - "linux/amd64"
-          - "linux/arm/v6"
-          - "linux/arm/v7"
-          - "linux/arm64/v8"
-          - "linux/riscv64"
+        targets:
+          - platform: "linux/386"
+            runs-on: ubuntu-latest
+          - platform: "linux/amd64"
+            runs-on: ubuntu-latest
+          - platform: "linux/arm/v6"
+            runs-on: ubuntu-24.04-arm
+          - platform: "linux/arm/v7"
+            runs-on: ubuntu-24.04-arm
+          - platform: "linux/arm64/v8"
+            runs-on: ubuntu-24.04-arm
+          - platform: "linux/riscv64"
+            runs-on: ubuntu-24.04-arm
 
     steps:
       - name: Checkout repository
@@ -41,13 +47,13 @@ jobs:
         id: set-variables
         run: |
           echo "DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_OUTPUT
-          echo "PLATFORM_NAME=${{ matrix.platform }}" | sed 's|/|-|g' >> $GITHUB_OUTPUT
+          echo "PLATFORM_NAME=${{ matrix.targets.platform }}" | sed 's|/|-|g' >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-        if: (matrix.platform != 'linux/386') && (matrix.platform != 'linux/amd64')
+        if: matrix.targets.platform == 'linux/riscv64'
         with:
-          platforms: ${{ matrix.platform }}
+          platforms: ${{ matrix.targets.platform }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -76,7 +82,7 @@ jobs:
             org.opencontainers.image.vendor=qBittorrent
             org.opencontainers.image.version=${{ env.QBT_VERSION }}
           load: true
-          platforms: ${{ matrix.platform }}
+          platforms: ${{ matrix.targets.platform }}
           tags: |
             qbittorrentofficial/qbittorrent-nox:latest-${{ steps.set-variables.outputs.PLATFORM_NAME }}
             ghcr.io/qbittorrent/docker-qbittorrent-nox:latest-${{ steps.set-variables.outputs.PLATFORM_NAME }}
@@ -85,7 +91,7 @@ jobs:
         run: |
           docker run \
             --entrypoint "/usr/bin/qbittorrent-nox" \
-            --platform ${{ matrix.platform }} \
+            --platform ${{ matrix.targets.platform }} \
             qbittorrentofficial/qbittorrent-nox:latest-${{ steps.set-variables.outputs.PLATFORM_NAME }} \
             --version
 
