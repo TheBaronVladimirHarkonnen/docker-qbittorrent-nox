@@ -1,0 +1,43 @@
+# for use with podman quadlets
+
+[Container]
+ContainerName=qbittorrent-nox
+Image=localhost/qbittorrent-nox
+Network=host
+AutoUpdate=local
+Timezone=local
+ReadOnly=true
+StopTimeout=1800
+NoNewPrivileges=true
+
+# can be anything, remove to use host user
+User=1337:1337
+
+# make downloaded files world writable
+PodmanArgs=--umask=0000
+
+# setting "ports" may be needed when "Network=host" is not used, prefer using host networking for speed.
+#PublishPort=6881:6881/tcp
+#PublishPort=6881:6881/udp
+#PublishPort=8080:8080/tcp
+
+# Create these volume paths manually, ":U" will chown them at container start
+Volume=/path/to/config:/config:U,noexec
+Volume=/path/to/downloads:/downloads:U,noexec
+
+# !!! SET THIS TO "confirm" (after reading qBittorrents legal notice)
+Environment=QBT_LEGAL_NOTICE=
+#Environment=QBT_WEBUI_PORT=8080
+#Environment=QBT_TORRENTING_PORT=6881
+
+[Service]
+Restart=always
+# when used with a .build configuration, this includes the build time
+TimeoutStartSec=30min
+# should be larger than podman's StopTimeout
+TimeoutStopSec=31min
+
+[Install]
+# uncomment this to start at boot
+#WantedBy=default.target
+

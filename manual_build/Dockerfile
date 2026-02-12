@@ -12,6 +12,7 @@ RUN \
     curl \
     doas \
     libcrypto3 \
+    libcurl \
     libssl3 \
     python3 \
     qt6-qtbase \
@@ -27,8 +28,9 @@ ARG QBT_VERSION \
     BOOST_VERSION_MAJOR="1" \
     BOOST_VERSION_MINOR="86" \
     BOOST_VERSION_PATCH="0" \
-    LIBBT_VERSION="RC_1_2" \
-    LIBBT_CMAKE_FLAGS=""
+    LIBBT_CMAKE_FLAGS="" \
+    CURL_DEBUG="OFF" \
+    BUILD_TYPE="RelWithDebInfo"
 
 # check environment variables
 RUN \
@@ -43,6 +45,7 @@ RUN \
 RUN \
   apk add \
     cmake \
+    curl-dev \
     git \
     g++ \
     make \
@@ -73,20 +76,21 @@ RUN \
 # build libtorrent
 RUN \
   git clone \
-    --branch "${LIBBT_VERSION}" \
     --depth 1 \
     --recurse-submodules \
-    https://github.com/arvidn/libtorrent.git && \
+    https://github.com/TheBaronVladimirHarkonnen/libtorrent.git && \
   cd libtorrent && \
   cmake \
     -B build \
     -G Ninja \
     -DBUILD_SHARED_LIBS=OFF \
-    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
     -DCMAKE_CXX_STANDARD=20 \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON \
     -DBOOST_ROOT=/boost/lib/cmake \
+    -Dcurl:BOOL=ON \
+    -Dcurl_debug:BOOL=${CURL_DEBUG} \
     -Ddeprecated-functions=OFF \
     $LIBBT_CMAKE_FLAGS && \
   cmake --build build -j $(nproc) && \
@@ -108,7 +112,7 @@ RUN \
   cmake \
     -B build \
     -G Ninja \
-    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON \
     -DBOOST_ROOT=/boost/lib/cmake \

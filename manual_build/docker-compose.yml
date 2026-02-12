@@ -1,35 +1,44 @@
+x-podman:
+  in_pod: false
+
 services:
   qbittorrent-nox:
-    build: .
-    # for debugging
-    #cap_add:
-      #- SYS_PTRACE
-    # additional arguments to `qbittorrent-nox`
-    #command:
-      #- --help
+    build:
+      context: .
+      args:
+        - QBT_VERSION=5.1.4
+        # "ON" or "OFF", if "ON" it it will enable logging of tracker connections to stderr (SSL handshake information, HTTP headers)
+        # (similar to curl --verbose http://...)
+        - CURL_DEBUG=ON
+        # This can be "RelWithDebInfo" for testing and "Release" for production
+        - BUILD_TYPE=RelWithDebInfo
     container_name: qbittorrent-nox
     environment:
       #- PAGID=10000
       #- PGID=1000
       #- PUID=1000
-      - QBT_LEGAL_NOTICE=${QBT_LEGAL_NOTICE}
-      - QBT_VERSION=${QBT_VERSION}
-      - QBT_TORRENTING_PORT=${QBT_TORRENTING_PORT}
-      - QBT_WEBUI_PORT=${QBT_WEBUI_PORT}
+      # !!! SET THIS TO "confirm" (after reading qBittorrents legal notice)
+      - QBT_LEGAL_NOTICE=
+      #- QBT_TORRENTING_PORT=6881
+      #- QBT_WEBUI_PORT=8080
       #- TZ=UTC
       #- UMASK=022
-    image: qbittorrent-nox:${QBT_VERSION}
-    ports:
-      # for bittorrent traffic
-      - ${QBT_TORRENTING_PORT}:${QBT_TORRENTING_PORT}/tcp
-      - ${QBT_TORRENTING_PORT}:${QBT_TORRENTING_PORT}/udp
+    image: localhost/qbittorrent-nox
+    network: host
+    # setting "ports" is only needed when "network: host" is removed
+    #ports:
+      # torrent port
+      #- 6881:6881/tcp
+      # utp (optional)
+      #- 6881:6881/udp
       # for WebUI
-      - ${QBT_WEBUI_PORT}:${QBT_WEBUI_PORT}/tcp
+      #- 8080:8080/tcp
     read_only: true
     stop_grace_period: 30m
     tmpfs:
       - /tmp
     tty: true
     volumes:
-      - ${QBT_CONFIG_PATH}:/config
-      - ${QBT_DOWNLOADS_PATH}:/downloads
+      - ./config:/config
+      - ./downloads:/downloads
+
