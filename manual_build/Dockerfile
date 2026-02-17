@@ -77,6 +77,7 @@ RUN \
 RUN \
   git clone \
     --depth 1 \
+    --branch v2.0.11_curl \
     --recurse-submodules \
     https://github.com/TheBaronVladimirHarkonnen/libtorrent.git && \
   cd libtorrent && \
